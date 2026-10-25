@@ -15,7 +15,9 @@ body{display:flex;flex-direction:column;background:var(--bg);color:var(--ink);fo
 header{display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--kraft);color:#2a1d10;border-bottom:4px solid var(--kraft-d);flex-wrap:wrap}
 header h1{margin:0;font-size:20px;letter-spacing:.5px}
 header .sub{font-size:13px;opacity:.8}
-@media (max-width:1300px){header .sub{display:none}}
+@media (max-width:1600px){header .sub{display:none}}
+#levels button{padding:4px 7px}
+#levels button.locked{opacity:.45;cursor:not-allowed;border-style:dashed}
 #levels{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
 .hbtn{border:0;background:#2a1d10;color:var(--kraft);padding:6px 11px;border-radius:6px;font-weight:700;cursor:pointer;font-size:13px}
 #levels button{border:2px solid #2a1d10;background:transparent;color:#2a1d10;padding:4px 8px;min-width:32px;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px}
@@ -36,7 +38,13 @@ main{display:grid;grid-template-columns:minmax(340px,38%) 1fr;flex:1;min-height:
 #editorWrap{flex:1;display:flex;min-height:180px;background:var(--code-bg);position:relative}
 #gutter{width:40px;padding:10px 6px 10px 0;text-align:right;color:#6d5c49;font:14px/1.5 ui-monospace,Consolas,"Courier New",monospace;overflow:hidden;user-select:none;white-space:pre}
 #code{flex:1;border:0;outline:0;resize:none;background:transparent;color:#f3e6d0;padding:10px;font:14px/1.5 ui-monospace,Consolas,"Courier New",monospace;white-space:pre;overflow:auto;tab-size:4}
-#bar{display:flex;gap:8px;padding:8px 10px;background:var(--panel2);flex-wrap:wrap}
+#bar{display:flex;gap:8px;padding:8px 10px;background:var(--panel2);flex-wrap:wrap;align-items:center}
+button.small.save{border-color:var(--accent);color:var(--accent);font-weight:700}
+#autosave{font-size:12px;color:var(--good);opacity:0;transition:opacity .4s;margin-left:auto}
+#autosave.on{opacity:1}
+.card textarea{width:100%;height:110px;background:#1d1814;color:#f3e6d0;border:1px solid #8a7660;border-radius:6px;font:12px/1.4 ui-monospace,Consolas,monospace;padding:8px;box-sizing:border-box;word-break:break-all}
+.card .row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.msg-ok{color:var(--good);font-weight:700} .msg-bad{color:var(--bad);font-weight:700}
 button.big{background:var(--accent);color:#2a1d10;border:0;border-radius:7px;padding:9px 16px;font-weight:700;font-size:15px;cursor:pointer}
 button.small{background:transparent;color:var(--ink);border:1px solid #8a7660;border-radius:7px;padding:7px 10px;font-size:13px;cursor:pointer}
 button:hover{filter:brightness(1.1)}
@@ -82,6 +90,9 @@ button:hover{filter:brightness(1.1)}
       <button class="small" id="helpBtn">? Python help</button>
       <button class="small" id="resetBtn">Reset level code</button>
       <button class="small" id="saveBtn">⬇ Download .py</button>
+      <button class="small save" id="saveProgBtn">💾 Save progress</button>
+      <button class="small save" id="loadProgBtn">📂 Load progress</button>
+      <span id="autosave">✓ Saved on this computer</span>
     </div>
     <div id="console"></div>
   </section>
@@ -149,21 +160,43 @@ zigzag(55)</pre>
     <li><b>Write code</b> using <code>ramp(x1, y1, x2, y2)</code> and <code>wall(x, y_bottom, y_top)</code>.</li>
     <li>Click <b>▶ Run my code</b> (or press Ctrl+Enter). Watch where the marble goes.</li>
     <li><b>Debug.</b> Read the black console. Change ONE thing, run again. Real engineers test over and over.</li>
+    <li>You must <b>write your own code</b> on every level. The starter code doesn't count. Pass a level to unlock the next one 🔓.</li>
     <li>Land in the cup to finish a level. Go back later to win a better medal: 🥉 → 🥈 → 🥇.</li>
   </ol>
   <h3>Tips</h3>
   <ul>
     <li>Click <b>? Python help</b> for examples of loops and functions.</li>
-    <li>Your code saves automatically on this computer. Click <b>⬇ Download .py</b> to turn it in.</li>
+    <li>Your code saves automatically on <b>this computer</b>. Switching computers? Click <b>💾 Save progress</b> to download a save file, then <b>📂 Load progress</b> on the new computer.</li>
     <li>Click <b>🏆 My progress</b> to see all your times.</li>
   </ul>
   <button class="big" onclick="closeOv('startOv')">Let's build! →</button>
+</div></div>
+<div class="overlay" id="saveOv"><div class="card">
+  <h2>💾 Save My Progress</h2>
+  <p>This saves <b>all your code, every level you finished, and your best times</b> so you can keep going on another computer or another day.</p>
+  <p>Your name: <input id="saveName" placeholder="First and last name"></p>
+  <div class="row"><button class="big" id="dlSave">⬇ Download my save file</button></div>
+  <p style="color:var(--muted);font-size:13px;margin:4px 0 12px">Keep the file in your <b>OneDrive</b> or turn it in on Canvas. Next time, click <b>📂 Load progress</b> and pick the file.</p>
+  <p style="margin-bottom:4px"><b>Or copy this save code</b> and paste it somewhere safe (an email to yourself, a OneNote page):</p>
+  <textarea id="saveCode" readonly></textarea>
+  <div class="row"><button class="small" id="copySave">📋 Copy save code</button><span id="saveMsg"></span></div>
+  <button class="big" onclick="closeOv('saveOv')">Close</button>
+</div></div>
+<div class="overlay" id="loadOv"><div class="card">
+  <h2>📂 Load My Progress</h2>
+  <p><b>Option 1:</b> pick your save file.</p>
+  <div class="row"><input type="file" id="loadFile" accept=".txt,text/plain"></div>
+  <p><b>Option 2:</b> paste your save code here.</p>
+  <textarea id="loadCode" placeholder="Paste your save code here"></textarea>
+  <div class="row"><button class="big" id="loadGo">Load it</button><span id="loadMsg"></span></div>
+  <p style="color:var(--muted);font-size:13px">Loading replaces the progress on this computer with the progress in your save.</p>
+  <button class="small" onclick="closeOv('loadOv')">Close</button>
 </div></div>
 <div class="overlay" id="progOv"><div class="card">
   <h2>🏆 My Progress</h2>
   <p>Your name: <input id="stuName" placeholder="First and last name"></p>
   <div id="progTable"></div>
-  <p style="color:var(--muted);font-size:13px">Take a screenshot of this screen to turn in your progress.</p>
+  <p style="color:var(--muted);font-size:13px">Take a screenshot of this screen to turn in your progress. To move your work to another computer, use <b>💾 Save progress</b>.</p>
   <button class="big" onclick="closeOv('progOv')">Close</button>
 </div></div>
 <script>(function(){'use strict';var $jscomp=$jscomp||{};$jscomp.scope={};$jscomp.ASSUME_ES5=!1;$jscomp.ASSUME_NO_NATIVE_MAP=!1;$jscomp.ASSUME_NO_NATIVE_SET=!1;$jscomp.SIMPLE_FROUND_POLYFILL=!1;$jscomp.defineProperty=$jscomp.ASSUME_ES5||"function"==typeof Object.defineProperties?Object.defineProperty:function(m,q,a){m!=Array.prototype&&m!=Object.prototype&&(m[q]=a.value)};$jscomp.getGlobal=function(m){return"undefined"!=typeof window&&window===m?m:"undefined"!=typeof global&&null!=global?global:m};$jscomp.global=$jscomp.getGlobal(this);
@@ -2340,7 +2373,7 @@ Sk.misceval.op2method_={Eq:Sk.builtin.str.$eq,NotEq:Sk.builtin.str.$ne,Gt:Sk.bui
 <script>
 // ===================== LEVELS =====================
 const LEVELS = [
- { name:"First Drop", skill:"ramp()", start:[-48,78], v0:15, cup:[40,48], maxPieces:7, maxLen:550, medals:[3,6,8],
+ { name:"First Drop", skill:"ramp()", start:[-48,78], v0:15, cup:[40,48], maxPieces:7, maxLen:750, medals:[3,6,8],
    text:"Get the marble into the red cup on the right. Then make it take as LONG as possible. The starter code works, but it's way too fast!",
    code:`# LEVEL 1: First Drop
 # Get the marble in the cup. Then make it SLOWER.
@@ -2349,16 +2382,16 @@ const LEVELS = [
 
 ramp(-54, 72, 36, 10)
 `},
- { name:"Bullseye", skill:"wall()", start:[-48,78], v0:15, cup:[-4,4], maxPieces:5, maxLen:320, medals:[2,3,3.9],
+ { name:"Bullseye", skill:"wall()", start:[-48,78], v0:15, cup:[-4,4], maxPieces:5, maxLen:750, medals:[2,3,3.9],
    text:"The cup is now in the MIDDLE of the box and you have less cardboard. You'll probably need a wall() to stop the marble.",
    code:`# LEVEL 2: Bullseye
 # The cup is in the middle (x from -4 to 4).
-# Only 5 pieces and 320 cm of cardboard!
+# Only 5 pieces and 750 cm of cardboard!
 # wall(x, y_bottom, y_top) makes a straight-up piece.
 
 ramp(-54, 72, 10, 50)
 `},
- { name:"Wrong Way", skill:"planning", start:[48,78], v0:-15, cup:[-48,-40], maxPieces:5, maxLen:320, medals:[2,3.5,4.8],
+ { name:"Wrong Way", skill:"planning", start:[48,78], v0:-15, cup:[-48,-40], maxPieces:5, maxLen:750, medals:[2,3.5,4.8],
    text:"The marble now starts on the RIGHT and rolls left. The cup is in the bottom-left corner.",
    code:`# LEVEL 3: Wrong Way
 # The marble starts at the top RIGHT: (48, 78)
@@ -2379,7 +2412,7 @@ for i in range(2):
     ramp(-54, y, 48, y - 8)
     y = y - 11
 `},
- { name:"Roadblock", skill:"obstacles", start:[-48,78], v0:15, cup:[40,48], maxPieces:6, maxLen:450, medals:[3,5,6.3],
+ { name:"Roadblock", skill:"obstacles", start:[-48,78], v0:15, cup:[40,48], maxPieces:6, maxLen:750, medals:[3,5,6.3],
    blocks:[[-10,22,10,42]],
    text:"Someone left a brick in the middle of your box! You can't move it. Build your run around it (or over it).",
    code:`# LEVEL 5: Roadblock
@@ -2388,14 +2421,14 @@ for i in range(2):
 
 ramp(-54, 72, 36, 10)
 `},
- { name:"High Shelf", skill:"precision", start:[-48,78], v0:15, cup:[40,48], cupY:30, maxPieces:5, maxLen:400, medals:[2,4,5],
+ { name:"High Shelf", skill:"precision", start:[-48,78], v0:15, cup:[40,48], cupY:30, maxPieces:5, maxLen:750, medals:[2,4,5],
    text:"The cup is sitting on a shelf <b>30 cm</b> off the floor. Your last ramp has to end HIGH.",
    code:`# LEVEL 6: High Shelf
 # The cup is on a shelf: x from 40 to 48, bottom at y = 30.
 
 ramp(-54, 72, 36, 50)
 `},
- { name:"Stopwatch", skill:"testing", start:[-48,78], v0:15, cup:[40,48], maxPieces:6, maxLen:550, window:[7.0,7.5],
+ { name:"Stopwatch", skill:"testing", start:[-48,78], v0:15, cup:[40,48], maxPieces:6, maxLen:750, window:[7.0,7.5],
    text:"A customer ordered a marble run that takes <b>between 7.00 and 7.50 seconds</b>. Not faster, not slower. Change one number at a time and test!",
    code:`# LEVEL 7: Stopwatch
 # The marble must land in the cup between 7.00 and 7.50 seconds.
@@ -2419,18 +2452,27 @@ def zigzag(y):
 
 zigzag(72)
 `},
- { name:"Final Exam", skill:"everything", start:[-48,78], v0:15, cup:[-4,4], cupY:20, maxPieces:7, maxLen:600, minTime:8, medals:[8,10,11],
-   text:"The cup is in the MIDDLE, on a shelf 20 cm high, and the run must take <b>at least 8 seconds</b>. Use everything you've learned.",
+ { name:"Final Exam", skill:"print · if/else · def", start:[-48,78], v0:15, cup:[-4,4], cupY:20, maxPieces:7, maxLen:750, minTime:8, medals:[8,10,11], needAll:true,
+   text:"The cup is in the MIDDLE, on a shelf 20 cm high, and the run must take <b>at least 8 seconds</b>. Your code MUST use <code>print()</code>, an <code>if</code>/<code>else</code>, and <b>your own function</b> made with <code>def</code> (and you have to call it).",
    code:`# LEVEL 9: Final Exam
 # Cup: x from -4 to 4, sitting on a shelf at y = 20.
-# Must take at least 8 seconds. 7 pieces, 600 cm.
+# Must take at least 8 seconds. 7 pieces, 750 cm.
+# Your code MUST use: print()   if / else   def (your own function)
 
-ramp(-54, 72, 48, 60)
+def build(y, going_right):
+    if going_right:
+        ramp(-54, y, 48, y - 6)
+    else:
+        print("add a ramp going LEFT here")
+
+build(72, True)
 `},
- { name:"Sandbox", skill:"creativity", start:[-48,78], v0:15, cup:[40,48], maxPieces:40, maxLen:5000, medals:null,
-   text:"No limits. Use loops and functions to build the craziest marble run you can. Can you break 40 seconds?",
+ { name:"Sandbox", start:[-48,78], v0:15, cup:[40,48], maxPieces:40, maxLen:5000, medals:null,
+   needAll:true, skill:"print · if/else · def",
+   text:"No limits on cardboard. Build the craziest marble run you can, but your code MUST use <code>print()</code>, an <code>if</code>/<code>else</code>, and <b>your own function</b> made with <code>def</code>. Can you break 40 seconds?",
    code:`# LEVEL 10: Sandbox -- up to 40 pieces!
-# This one MISSES the cup. Can you fix it, then make it epic?
+# This one MISSES the cup. Fix it, then make it epic.
+# Your code MUST use: print()   if / else   def (your own function)
 
 y = 72
 for i in range(5):
@@ -2439,6 +2481,24 @@ for i in range(5):
     else:
         ramp(54, y, -48, y - 8)
     y = y - 13
+`},
+ { name:"Double Trouble", skill:"two marbles", bonus:true, maxPieces:14, maxLen:750, medals:[2,3,3.5],
+   marbles:[{name:"Blue",start:[-48,78],v0:15,cup:[-28,-20],col:0x2b6fe0,css:"#4b9bff"},{name:"Red",start:[48,78],v0:-15,cup:[20,28],col:0xd23b30,css:"#ff6b5e"}],
+   require:{re:/\bdef\b/, msg:"This level requires you to write your own function with def (use it for both marbles)."},
+   text:"<b>BONUS!</b> Two marbles drop at the same time: <b style='color:#4b9bff'>blue</b> from the top left, <b style='color:#ff6b5e'>red</b> from the top right. Each one must land in <b>its own color cup</b>. They can bump into each other! Your time is the <b>slower</b> marble. Write one function and use it for both sides.",
+   code:`# BONUS: Double Trouble -- two marbles at once!
+# Blue starts top LEFT (-48, 78)  -> blue cup: x from -28 to -20
+# Red starts top RIGHT (48, 78)   -> red cup:  x from 20 to 28
+# Your time is the SLOWER marble. They can bump into each other!
+# You MUST write a function with def and use it for both sides.
+# Trick: multiply every x by s (1 or -1) to make a mirror image.
+
+def side(s):
+    ramp(s * -54, 72, s * -4, 60)
+
+side(1)      # blue side
+side(-1)     # red side
+wall(0, 8, 76)
 `}
 ];
 
@@ -2450,6 +2510,7 @@ function sset(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
 const $ = id => document.getElementById(id);
 const codeEl=$("code"), gutter=$("gutter"), consoleEl=$("console");
 let levelIdx = parseInt(sget("mr_level")||"0",10); if(!(levelIdx>=0&&levelIdx<LEVELS.length)) levelIdx=0;
+function fixStartLevel(){ if(!isUnlocked(levelIdx)) levelIdx=highestUnlocked(); }
 let speed = 1;
 
 function log(msg, cls){ const d=document.createElement("div"); if(cls) d.className=cls; d.textContent=msg; consoleEl.appendChild(d); consoleEl.scrollTop=consoleEl.scrollHeight; }
@@ -2468,10 +2529,14 @@ codeEl.addEventListener("keydown",e=>{
     codeEl.value=before+"\n"+ind+codeEl.value.slice(codeEl.selectionEnd); codeEl.selectionStart=codeEl.selectionEnd=s+1+ind.length; updateGutter(); sset("mr_code_"+levelIdx, codeEl.value); }
 });
 
+function isUnlocked(i){ if(i<=0) return true; if(sget("mr_teacher")==="1") return true; return !!sget("mr_done_"+(i-1)); }
+function highestUnlocked(){ let i=0; while(i+1<LEVELS.length && isUnlocked(i+1)) i++; return i; }
 function buildLevelButtons(){
   const box=$("levels"); box.innerHTML="";
   LEVELS.forEach((L,i)=>{ const b=document.createElement("button"); const done=sget("mr_done_"+i);
-    b.textContent=(i+1)+(done?" ✓":""); b.title="Level "+(i+1)+": "+L.name; if(i===levelIdx) b.className="on"; else if(done) b.className="done";
+    const lock=!isUnlocked(i);
+    b.textContent=(lock?"🔒 ":"")+(L.bonus?"★ BONUS":(i+1))+(done?" ✓":"");
+    if(lock){ b.className="locked"; b.title="Locked — pass Level "+i+" first"; } b.title="Level "+(i+1)+": "+L.name; if(i===levelIdx) b.className="on"; else if(done) b.className="done";
     b.onclick=()=>loadLevel(i); box.appendChild(b); });
 }
 function rulesText(L){
@@ -2481,13 +2546,14 @@ function rulesText(L){
   if(L.maxLines) r.push(`${L.maxLines} lines of code max`);
   if(L.window) r.push(`land between ${L.window[0].toFixed(2)} and ${L.window[1].toFixed(2)} s`);
   if(L.minTime) r.push(`at least ${L.minTime} s`);
+  if(L.needAll) r.push("must use print(), if/else and your own def function");
   let m="";
   if(L.medals) m=` · 🥉 ${L.minTime?L.minTime+" s":"in the cup"} · 🥈 ${L.medals[1]} s · 🥇 ${L.medals[2]} s`;
   return "Rules: "+r.join(", ")+m;
 }
 function showMission(){
   const L=LEVELS[levelIdx];
-  $("mission").innerHTML=`<h2>Level ${levelIdx+1} · ${L.name} <span class="skill">${L.skill}</span></h2>${L.text}<div class="rules">${rulesText(L)}</div>`;
+  $("mission").innerHTML=`<h2>${L.bonus?"BONUS":"Level "+(levelIdx+1)} · ${L.name} <span class="skill">${L.skill}</span></h2>${L.text}<div class="rules">${rulesText(L)}</div>`;
 }
 function showBest(){
   const L=LEVELS[levelIdx];
@@ -2498,6 +2564,7 @@ function showBest(){
 function medalFor(t,i){ const m=LEVELS[i===undefined?levelIdx:i].medals; if(!m) return ""; if(t>=m[2]) return "🥇"; if(t>=m[1]) return "🥈"; return "🥉"; }
 
 function loadLevel(i){
+  if(!isUnlocked(i)){ const prev=LEVELS[i-1]; clearLog(); log(`🔒 That level is locked. Pass ${prev.bonus?"the bonus":"Level "+i} (${prev.name}) first!`,"warn"); return; }
   levelIdx=i; sset("mr_level",String(i));
   codeEl.value = sget("mr_code_"+i) || LEVELS[i].code; updateGutter();
   buildLevelButtons(); showMission(); showBest(); clearLog();
@@ -2567,31 +2634,35 @@ function brickTex(){ const c=document.createElement("canvas"); c.width=128;c.hei
 const brickMat=new THREE.MeshStandardMaterial({map:brickTex(),roughness:.9});
 
 // marble
-function marbleTex(){ const c=document.createElement("canvas"); c.width=128;c.height=64; const g=c.getContext("2d");
-  const gr=g.createLinearGradient(0,0,128,0); gr.addColorStop(0,"#2b6fe0"); gr.addColorStop(.5,"#8fd0ff"); gr.addColorStop(1,"#2b6fe0"); g.fillStyle=gr; g.fillRect(0,0,128,64);
+function marbleTex(a="#2b6fe0",b="#8fd0ff"){ const c=document.createElement("canvas"); c.width=128;c.height=64; const g=c.getContext("2d");
+  const gr=g.createLinearGradient(0,0,128,0); gr.addColorStop(0,a); gr.addColorStop(.5,b); gr.addColorStop(1,a); g.fillStyle=gr; g.fillRect(0,0,128,64);
   g.strokeStyle="#ffffff"; g.lineWidth=6; g.beginPath(); for(let x=0;x<=128;x+=2){ const y=32+18*Math.sin(x/128*Math.PI*4); x?g.lineTo(x,y):g.moveTo(x,y);} g.stroke();
   return new THREE.CanvasTexture(c); }
 const R=1.0, T=0.6;
 const marble=new THREE.Mesh(new THREE.SphereGeometry(R,32,24),new THREE.MeshStandardMaterial({map:marbleTex(),roughness:.15,metalness:.1}));
 marble.castShadow=true; scene.add(marble);
-// trail
-const TRAIL_MAX=20000; const trailPos=new Float32Array(TRAIL_MAX*3);
-const trailGeo=new THREE.BufferGeometry(); trailGeo.setAttribute("position",new THREE.BufferAttribute(trailPos,3)); trailGeo.setDrawRange(0,0);
-const trail=new THREE.Line(trailGeo,new THREE.LineBasicMaterial({color:0x7fc4ff})); scene.add(trail);
-let trailN=0;
+const marble2=new THREE.Mesh(new THREE.SphereGeometry(R,32,24),new THREE.MeshStandardMaterial({map:marbleTex("#c0392b","#ffb0a0"),roughness:.15,metalness:.1}));
+marble2.castShadow=true; marble2.visible=false; scene.add(marble2);
+// trails (one per marble)
+const TRAIL_MAX=20000;
+function makeTrail(col){ const pos=new Float32Array(TRAIL_MAX*3), geo=new THREE.BufferGeometry(); geo.setAttribute("position",new THREE.BufferAttribute(pos,3)); geo.setDrawRange(0,0);
+  const line=new THREE.Line(geo,new THREE.LineBasicMaterial({color:col})); scene.add(line); return {pos,geo,line,n:0}; }
+const TRAILS=[makeTrail(0x7fc4ff),makeTrail(0xff9a8a)], MESHES=[marble,marble2];
+function marblesOf(L){ return L.marbles || [{name:"",start:L.start,v0:L.v0,cup:L.cup,cupY:L.cupY||0,col:0xd23b30}]; }
 
 let pieces=[];   // {x1,y1,x2,y2,color,bad}
 function buildWorld(){
   const L=LEVELS[levelIdx];
   levelGroup.clear(); pieceGroup.clear();
   // cup
-  const cupMat=new THREE.MeshStandardMaterial({color:0xd23b30,roughness:.6});
-  const [cl,cr]=L.cup; const cy=L.cupY||0;
-  addBox(levelGroup,0.6,6,D,cl,cy+3,0,cupMat); addBox(levelGroup,0.6,6,D,cr,cy+3,0,cupMat); addBox(levelGroup,cr-cl,0.4,D,(cl+cr)/2,cy+0.2,0,cupMat);
-  if(cy>0) addBox(levelGroup,cr-cl+0.6,cy,D,(cl+cr)/2,cy/2,0,new THREE.MeshStandardMaterial({color:0x6b4a2e,roughness:.9}));
+  for(const M of marblesOf(L)){
+    const cupMat=new THREE.MeshStandardMaterial({color:M.col,roughness:.6});
+    const [cl,cr]=M.cup; const cy=M.cupY||0;
+    addBox(levelGroup,0.6,6,D,cl,cy+3,0,cupMat); addBox(levelGroup,0.6,6,D,cr,cy+3,0,cupMat); addBox(levelGroup,cr-cl,0.4,D,(cl+cr)/2,cy+0.2,0,cupMat);
+    if(cy>0) addBox(levelGroup,cr-cl+0.6,cy,D,(cl+cr)/2,cy/2,0,new THREE.MeshStandardMaterial({color:0x6b4a2e,roughness:.9}));
+    const st=new THREE.Mesh(new THREE.ConeGeometry(1.5,3,16),new THREE.MeshStandardMaterial({color:L.marbles?M.col:0x5cc95c})); st.rotation.z=Math.PI; st.position.set(M.start[0],M.start[1]+4,0); levelGroup.add(st);
+  }
   for(const b of (L.blocks||[])){ addBox(levelGroup,b[2]-b[0],b[3]-b[1],D,(b[0]+b[2])/2,(b[1]+b[3])/2,0,brickMat); }
-  // start marker
-  const st=new THREE.Mesh(new THREE.ConeGeometry(1.5,3,16),new THREE.MeshStandardMaterial({color:0x5cc95c})); st.rotation.z=Math.PI; st.position.set(L.start[0],L.start[1]+4,0); levelGroup.add(st);
   // pieces
   for(const p of pieces){
     const dx=p.x2-p.x1, dy=p.y2-p.y1, len=Math.hypot(dx,dy);
@@ -2613,16 +2684,18 @@ function updateBudget(){
 
 // ===================== PHYSICS =====================
 const g=981, DT=0.0005, ROLL=0.02, TIME_LIMIT=60, CUP_H=6;
-let sim=null; // {x,y,vx,vy,t,contacts,still,done,angle}
+let sim=null, sims=null; // sim = the final result; sims = one {x,y,vx,vy,t,...} per marble
 function resetMarble(){
-  const L=LEVELS[levelIdx];
-  marble.position.set(L.start[0],L.start[1],0); marble.rotation.set(0,0,0);
-  trailN=0; trailGeo.setDrawRange(0,0); sim=null; $("clock").textContent="0.00 s"; $("banner").style.display="none";
+  const L=LEVELS[levelIdx], Ms=marblesOf(L);
+  MESHES.forEach((m,i)=>{ m.visible=i<Ms.length; if(i<Ms.length){ m.position.set(Ms[i].start[0],Ms[i].start[1],0); m.rotation.set(0,0,0); } });
+  TRAILS.forEach(t=>{ t.n=0; t.geo.setDrawRange(0,0); });
+  sim=null; sims=null; $("clock").textContent="0.00 s"; $("banner").style.display="none";
 }
 function segs(){
-  const L=LEVELS[levelIdx]; const s=pieces.map(p=>[p.x1,p.y1,p.x2,p.y2]); const cy=L.cupY||0;
-  s.push([L.cup[0],0,L.cup[0],cy+CUP_H],[L.cup[1],0,L.cup[1],cy+CUP_H]);
-  if(cy>0) s.push([L.cup[0],cy,L.cup[1],cy]);
+  const L=LEVELS[levelIdx]; const s=pieces.map(p=>[p.x1,p.y1,p.x2,p.y2]);
+  for(const M of marblesOf(L)){ const cy=M.cupY||0;
+    s.push([M.cup[0],0,M.cup[0],cy+CUP_H],[M.cup[1],0,M.cup[1],cy+CUP_H]);
+    if(cy>0) s.push([M.cup[0],cy,M.cup[1],cy]); }
   for(const b of (L.blocks||[])) s.push([b[0],b[1],b[2],b[1]],[b[2],b[1],b[2],b[3]],[b[2],b[3],b[0],b[3]],[b[0],b[3],b[0],b[1]]);
   return s;
 }
@@ -2630,10 +2703,18 @@ let SEGS=[];
 function startSim(){
   resetMarble(); const L=LEVELS[levelIdx];
   SEGS=segs().filter(s=>Math.hypot(s[2]-s[0],s[3]-s[1])>0.01);
-  sim={x:L.start[0],y:L.start[1],vx:L.v0,vy:0,t:0,contacts:[],still:0,done:null,angle:0};
+  sims=marblesOf(L).map((M,i)=>({x:M.start[0],y:M.start[1],vx:M.v0,vy:0,t:0,contacts:[],still:0,done:null,angle:0,M,i}));
 }
-function step(){
-  const s=sim; let ax=0, ay=-g;
+// marbles bump into each other (equal mass, a bit bouncy)
+function collideMarbles(){
+  if(!sims||sims.length<2) return;
+  for(let i=0;i<sims.length;i++) for(let j=i+1;j<sims.length;j++){ const a=sims[i], b=sims[j]; if(a.done||b.done) continue;
+    const dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy); if(d>=2*R||d===0) continue;
+    const nx=dx/d, ny=dy/d, push=(2*R-d)/2; a.x-=nx*push; a.y-=ny*push; b.x+=nx*push; b.y+=ny*push;
+    const rel=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny; if(rel<0){ const j2=-(1+0.6)*rel/2; a.vx-=j2*nx; a.vy-=j2*ny; b.vx+=j2*nx; b.vy+=j2*ny; if(-rel>8) bumpFlash=1; } } }
+let bumpFlash=0;
+function step(s){
+  let ax=0, ay=-g;
   for(const n of s.contacts){
     const gn=-g*n[1]; const gtx=0-gn*n[0], gty=-g-gn*n[1];
     ax-=(2/7)*gtx; ay-=(2/7)*gty;
@@ -2655,8 +2736,8 @@ function step(){
   }
   if(s.x<-55+R){ s.x=-55+R; s.vx=Math.abs(s.vx)*0.3; }
   if(s.x>55-R){ s.x=55-R; s.vx=-Math.abs(s.vx)*0.3; }
-  const L=LEVELS[levelIdx];
-  const cy=L.cupY||0; if(s.x>L.cup[0]+R && s.x<L.cup[1]-R && s.y<cy+CUP_H && s.y>cy){ s.done="cup"; return; }
+  const M=s.M, cy=M.cupY||0; if(s.x>M.cup[0]+R && s.x<M.cup[1]-R && s.y<cy+CUP_H && s.y>cy){ s.done="cup"; return; }
+  for(const O of marblesOf(LEVELS[levelIdx])) if(O!==M){ const oy=O.cupY||0; if(s.x>O.cup[0]+R && s.x<O.cup[1]-R && s.y<oy+CUP_H && s.y>oy){ s.done="wrongcup"; return; } }
   if(s.y<R){ s.y=R; s.done="floor"; return; }
   if(Math.hypot(s.vx,s.vy)<2) s.still+=DT; else s.still=0;
   if(s.still>1.5){ s.done="stuck"; return; }
@@ -2664,7 +2745,8 @@ function step(){
 }
 function finish(){
   const s=sim, b=$("banner"); let html="";
-  const L=LEVELS[levelIdx];
+  const L=LEVELS[levelIdx], who=s.M&&s.M.name ? `<span style="color:${s.M.css}">${s.M.name}</span> marble` : "The marble", whoTxt=s.M&&s.M.name?s.M.name+" marble":"Marble";
+  if(s.done==="wrongcup"){ html=`<b style="color:#ff6b5e">Wrong cup!</b>${who} landed in the other color's cup.`; log(`✘ ${whoTxt} landed in the wrong cup.`,"err"); b.innerHTML=html+'<div style="font-size:12px;opacity:.6;margin-top:8px">(click to close)</div>'; b.style.display="block"; return; }
   if(s.done==="cup" && L.window && (s.t<L.window[0]||s.t>L.window[1])){
     const dir = s.t<L.window[0] ? "too FAST — slow it down" : "too SLOW — speed it up";
     html=`<b style="color:#ffc04d">In the cup, but ${s.t.toFixed(2)} s</b>That's ${dir}.<br><span style="font-size:14px">Target: ${L.window[0].toFixed(2)} – ${L.window[1].toFixed(2)} seconds</span>`;
@@ -2672,20 +2754,24 @@ function finish(){
   } else if(s.done==="cup" && L.minTime && s.t<L.minTime){
     html=`<b style="color:#ffc04d">In the cup, but too fast</b>${s.t.toFixed(2)} s — it needs at least ${L.minTime} s.`;
     log(`⚠ In the cup at ${s.t.toFixed(2)} s, but it must take at least ${L.minTime} s.`,"warn");
+  } else if(s.done==="cup" && isStarter()){
+    html=`<b style="color:#ffc04d">Nice — but that's the starter code!</b>Write your own Python to pass this level.<br><span style="font-size:14px">Change the ramps, add new ones, make it yours.</span>`;
+    log("⚠ That was the starter code, so it doesn't count. Change it and run again!","warn");
   } else if(s.done==="cup"){
     const t=s.t; let rec=""; const first=!sget("mr_done_"+levelIdx);
     sset("mr_done_"+levelIdx,"1");
     if(!L.window){ const prev=parseFloat(sget("mr_best_"+levelIdx)||"0"); if(t>prev){ sset("mr_best_"+levelIdx,t.toFixed(2)); rec="<br>⭐ New personal best!"; } }
     showBest(); buildLevelButtons();
-    const next = levelIdx<LEVELS.length-1 ? (first?`<br><span style="font-size:14px">Try for a better medal, or move on to Level ${levelIdx+2} →</span>`:`<br><span style="font-size:14px">Now can you make it slower?</span>`) : "";
-    html=`<b style="color:#6fd36f">${L.window?"PERFECT TIMING! ✅":"IN THE CUP! "+medalFor(t)}</b>Time: ${t.toFixed(2)} seconds${rec}${next}`;
-    log(`✔ In the cup! Time: ${t.toFixed(2)} s`,"ok");
+    const nx=LEVELS[levelIdx+1], nxName=nx?(nx.bonus?"the BONUS level":"Level "+(levelIdx+2)):"";
+    const next = nx ? (first?`<br><span style="font-size:14px">🔓 ${nxName} unlocked! Try for a better medal, or move on →</span>`:`<br><span style="font-size:14px">Now can you make it slower?</span>`) : "";
+    html=`<b style="color:#6fd36f">${L.window?"PERFECT TIMING! ✅":(L.marbles?"BOTH IN THEIR CUPS! ":"IN THE CUP! ")+medalFor(t)}</b>Time: ${t.toFixed(2)} seconds${L.marbles?" (the slower marble)":""}${rec}${next}`;
+    log(L.marbles?`✔ Both marbles made it! ${sims.map(q=>q.M.name+" "+q.t.toFixed(2)+" s").join(", ")} → your time: ${t.toFixed(2)} s`:`✔ In the cup! Time: ${t.toFixed(2)} s`,"ok");
   } else if(s.done==="floor"){
-    html=`<b style="color:#ff6b5e">Missed the cup</b>The marble hit the floor at x = ${s.x.toFixed(1)}<br><span style="font-size:14px">The cup is from x = ${LEVELS[levelIdx].cup[0]} to ${LEVELS[levelIdx].cup[1]}</span>`;
-    log(`✘ Missed. Marble hit the floor at x = ${s.x.toFixed(1)}`,"err");
+    html=`<b style="color:#ff6b5e">Missed the cup</b>${who} hit the floor at x = ${s.x.toFixed(1)}<br><span style="font-size:14px">${s.M.name?"Its":"The"} cup is from x = ${s.M.cup[0]} to ${s.M.cup[1]}</span>`;
+    log(`✘ Missed. ${whoTxt} hit the floor at x = ${s.x.toFixed(1)}`,"err");
   } else if(s.done==="stuck"){
-    html=`<b style="color:#ffc04d">Stuck!</b>The marble stopped near (${s.x.toFixed(1)}, ${s.y.toFixed(1)})<br><span style="font-size:14px">A ramp is too flat, or the marble is trapped.</span>`;
-    log(`⚠ Marble got stuck near (${s.x.toFixed(1)}, ${s.y.toFixed(1)}). Make that ramp steeper.`,"warn");
+    html=`<b style="color:#ffc04d">Stuck!</b>${who} stopped near (${s.x.toFixed(1)}, ${s.y.toFixed(1)})<br><span style="font-size:14px">A ramp is too flat, or the marble is trapped.</span>`;
+    log(`⚠ ${whoTxt} got stuck near (${s.x.toFixed(1)}, ${s.y.toFixed(1)}). Make that ramp steeper.`,"warn");
   } else { html=`<b>Time's up</b>${TIME_LIMIT} second limit reached.`; log("Time limit reached.","warn"); }
   b.innerHTML=html+'<div style="font-size:12px;opacity:.6;margin-top:8px">(click to close)</div>'; b.style.display="block";
 }
@@ -2708,7 +2794,8 @@ Sk.builtins.wall=new Sk.builtin.func(function(x,yb,yt,c){
 });
 function builtinRead(x){ if(Sk.builtinFiles===undefined||Sk.builtinFiles["files"][x]===undefined) throw "File not found: '"+x+"'"; return Sk.builtinFiles["files"][x]; }
 let outBuf="";
-Sk.configure({ output:t=>{ outBuf+=t; const parts=outBuf.split("\n"); outBuf=parts.pop(); parts.forEach(p=>log(p)); }, read:builtinRead, __future__:Sk.python3, execLimit:4000 });
+let printed=false;
+Sk.configure({ output:t=>{ if(String(t).trim()) printed=true; outBuf+=t; const parts=outBuf.split("\n"); outBuf=parts.pop(); parts.forEach(p=>log(p)); }, read:builtinRead, __future__:Sk.python3, execLimit:4000 });
 
 function validate(){
   const L=LEVELS[levelIdx]; const probs=[];
@@ -2725,9 +2812,19 @@ function validate(){
   if(L.minPieces && pieces.length<L.minPieces) probs.push(`You need at least ${L.minPieces} pieces. You have ${pieces.length}.`);
   const lines=codeLines();
   if(L.maxLines && lines>L.maxLines) probs.push(`Your code has ${lines} lines (comments and blank lines don't count). The limit is ${L.maxLines}.`);
-  if(L.require){ const noComments=codeEl.value.split("\n").map(l=>l.replace(/#.*/,"")).join("\n"); if(!L.require.re.test(noComments)) probs.push(L.require.msg); }
+  const noComments=codeEl.value.split("\n").map(l=>l.replace(/#.*/,"")).join("\n").replace(/(["'])(?:\\.|(?!\1).)*\1/g,'""');
+  if(L.require){ if(!L.require.re.test(noComments)) probs.push(L.require.msg); }
+  if(L.needAll){
+    if(!/\bprint\s*\(/.test(noComments) || !printed) probs.push("Use print() to show something in the console (it has to actually run).");
+    if(!/^\s*if\b/m.test(noComments) || !/^\s*else\s*:/m.test(noComments)) probs.push("Use an if / else in your code.");
+    const defs=[...noComments.matchAll(/^\s*def\s+([A-Za-z_]\w*)\s*\(/gm)].map(m=>m[1]);
+    if(!defs.length) probs.push("Write your own function with def.");
+    else if(!defs.some(n=>(noComments.match(new RegExp("\\b"+n+"\\s*\\(","g"))||[]).length>=2)) probs.push("You wrote a function — now call it! (use its name with ( ) somewhere below the def)");
+  }
   return probs;
 }
+const norm=t=>t.split("\n").map(l=>l.replace(/#.*/,"").trim()).filter(Boolean).join("\n");
+function isStarter(){ return norm(codeEl.value)===norm(LEVELS[levelIdx].code); }
 function codeLines(){
   let n=0; for(const raw of codeEl.value.split("\n")){ const l=raw.replace(/#.*/,"").trim(); if(!l) continue; n+= l.split(";").filter(x=>x.trim()).length; }
   return n;
@@ -2735,14 +2832,14 @@ function codeLines(){
 let running=false;
 async function runCode(){
   if(running) return; running=true;
-  clearLog(); pieces=[]; outBuf=""; sim=null;
+  clearLog(); pieces=[]; outBuf=""; sim=null; sims=null; printed=false;
   try{
     await Sk.misceval.asyncToPromise(()=>Sk.importMainWithBody("<stdin>",false,codeEl.value,true));
     if(outBuf){ log(outBuf); outBuf=""; }
     const probs=validate(); buildWorld();
     if(pieces.length===0){ log("Your code didn't build any cardboard. Use ramp(x1, y1, x2, y2).","warn"); }
     if(probs.length){ log("Your design breaks the rules:","err"); probs.forEach(p=>log("  • "+p,"err")); log("Fix it and run again. (Bad pieces are shown in red.)","err"); }
-    else { log(`Built ${pieces.length} piece(s), ${totalLen().toFixed(0)} cm of cardboard. Dropping the marble...`,"sys"); startSim(); }
+    else { log(`Built ${pieces.length} piece(s), ${totalLen().toFixed(0)} cm of cardboard. Dropping the ${LEVELS[levelIdx].marbles?"marbles":"marble"}...`,"sys"); startSim(); }
   }catch(err){
     pieces=[]; buildWorld();
     let msg=err.toString();
@@ -2758,15 +2855,18 @@ function highlightLine(ln){ const lines=codeEl.value.split("\n"); let s=0; for(l
 let lastT=performance.now();
 function frame(now){
   const dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
-  if(sim && !sim.done){
+  if(sims && !sim){
     const n=Math.round(dt*speed/DT);
-    for(let i=0;i<n && !sim.done;i++){
-      const px=sim.x; step(); sim.angle-= (sim.x-px)/R;
+    for(let i=0;i<n && !sim;i++){
+      for(const q of sims){ if(q.done) continue; const px=q.x; step(q); q.angle-=(q.x-px)/R; }
+      collideMarbles();
+      const bad=sims.find(q=>q.done&&q.done!=="cup");
+      if(bad) sim=bad; else if(sims.every(q=>q.done==="cup")){ const slow=sims.reduce((a,q)=>q.t>a.t?q:a); sim={...slow,done:"cup"}; }
     }
-    marble.position.set(sim.x,sim.y,0); marble.rotation.z=sim.angle;
-    if(trailN<TRAIL_MAX){ trailPos[trailN*3]=sim.x; trailPos[trailN*3+1]=sim.y; trailPos[trailN*3+2]=0; trailN++; trailGeo.setDrawRange(0,trailN); trailGeo.attributes.position.needsUpdate=true; }
-    $("clock").textContent=sim.t.toFixed(2)+" s";
-    if(sim.done) finish();
+    sims.forEach(q=>{ const m=MESHES[q.i], T=TRAILS[q.i]; m.position.set(q.x,q.y,0); m.rotation.z=q.angle;
+      if(!q.done && T.n<TRAIL_MAX){ T.pos[T.n*3]=q.x; T.pos[T.n*3+1]=q.y; T.pos[T.n*3+2]=0; T.n++; T.geo.setDrawRange(0,T.n); T.geo.attributes.position.needsUpdate=true; } });
+    $("clock").textContent=Math.max(...sims.map(q=>q.t)).toFixed(2)+" s";
+    if(sim) finish();
   }
   controls.update(); renderer.render(scene,camera); requestAnimationFrame(frame);
 }
@@ -2794,17 +2894,64 @@ function showProgress(){
   $("stuName").value=sget("mr_name")||"";
   let done=0, html="<table><tr><th>#</th><th>Level</th><th>Skill</th><th>Result</th></tr>";
   LEVELS.forEach((L,i)=>{ const d=sget("mr_done_"+i); if(d) done++; const b=parseFloat(sget("mr_best_"+i)||"0");
-    const res = !d ? "—" : (L.window ? "✅ Complete" : b.toFixed(2)+" s "+medalFor(b,i));
+    const res = !isUnlocked(i) ? "🔒 Locked" : !d ? "—" : (L.window ? "✅ Complete" : b.toFixed(2)+" s "+medalFor(b,i));
     html+=`<tr><td>${i+1}</td><td>${L.name}</td><td>${L.skill}</td><td>${res}</td></tr>`; });
   html+=`</table><p><b>${done} of ${LEVELS.length} levels complete</b> · ${new Date().toLocaleDateString()}</p>`;
   $("progTable").innerHTML=html; $("progOv").style.display="flex";
 }
 $("stuName").addEventListener("input",e=>sset("mr_name",e.target.value));
+/* ===================== SAVE MODE =====================
+   A save holds every level's code, which levels are done, best times, and the name.
+   It carries a check value, so a save file that was edited by hand (to fake progress) won't load. */
+const TEACHER_CODE="lancers2026";
+const SAVE_TAG="MARBLE-RUN-SAVE:", SALT="cardboard+lancers+2026";
+function chk(str){ let h1=0x811c9dc5, h2=0x1b873593; for(let i=0;i<str.length;i++){ const c=str.charCodeAt(i); h1=Math.imul(h1^c,0x01000193)>>>0; h2=Math.imul(h2^(c+i),0x5bd1e995)>>>0; h2^=h2>>>15; } return h1.toString(16).padStart(8,"0")+h2.toString(16).padStart(8,"0"); }
+const b64e=t=>btoa(unescape(encodeURIComponent(t))), b64d=t=>decodeURIComponent(escape(atob(t)));
+function makeSave(){
+  const data={v:1,name:sget("mr_name")||"",at:new Date().toISOString(),cur:levelIdx,
+    levels:LEVELS.map((L,i)=>({n:L.name,c:sget("mr_code_"+i)||"",d:sget("mr_done_"+i)?1:0,b:parseFloat(sget("mr_best_"+i)||"0")||0}))};
+  const body=JSON.stringify(data); return SAVE_TAG+b64e(JSON.stringify({d:body,h:chk(body+SALT)}));
+}
+function readSave(text){
+  const i=text.indexOf(SAVE_TAG); const code=(i>=0?text.slice(i+SAVE_TAG.length):text).replace(/\s+/g,"");
+  let o; try{ o=JSON.parse(b64d(code)); }catch(e){ throw new Error("That isn't a Marble Run save."); }
+  if(!o||typeof o.d!=="string"||chk(o.d+SALT)!==o.h) throw new Error("This save was changed or damaged, so it can't be loaded.");
+  const data=JSON.parse(o.d); if(!data||!Array.isArray(data.levels)) throw new Error("That isn't a Marble Run save."); return data;
+}
+function applySave(data){
+  data.levels.forEach((x,k)=>{ const i=LEVELS.findIndex(L=>L.name===x.n); const j=i>=0?i:k; if(j>=LEVELS.length) return;
+    if(x.c) sset("mr_code_"+j,x.c); else { try{ localStorage.removeItem("mr_code_"+j); }catch(e){} }
+    if(x.d) sset("mr_done_"+j,"1"); else { try{ localStorage.removeItem("mr_done_"+j); }catch(e){} }
+    if(x.b>0) sset("mr_best_"+j,String(x.b)); else { try{ localStorage.removeItem("mr_best_"+j); }catch(e){} } });
+  if(data.name) sset("mr_name",data.name);
+  levelIdx=Math.min(Math.max(0,data.cur|0),LEVELS.length-1); fixStartLevel(); loadLevel(levelIdx);
+}
+function openSave(){ $("saveName").value=sget("mr_name")||""; $("saveCode").value=makeSave(); $("saveMsg").textContent=""; $("saveOv").style.display="flex"; }
+$("saveName").addEventListener("input",e=>{ sset("mr_name",e.target.value); $("saveCode").value=makeSave(); });
+$("dlSave").onclick=()=>{ const nm=(sget("mr_name")||"student").replace(/[^A-Za-z0-9]+/g,"")||"student";
+  const done=LEVELS.filter((L,i)=>sget("mr_done_"+i)).length;
+  const txt=`Cardboard Marble Run — save file\nName: ${sget("mr_name")||""}\nSaved: ${new Date().toLocaleString()}\nLevels complete: ${done} of ${LEVELS.length}\n\nTo continue: open the Marble Run site, click "Load progress", and pick this file.\nDon't edit this file or it won't load.\n\n${makeSave()}\n`;
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([txt],{type:"text/plain"})); a.download=`marble-run-save-${nm}.txt`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  $("saveMsg").innerHTML='<span class="msg-ok">Downloaded! Check your Downloads folder.</span>'; };
+$("copySave").onclick=async()=>{ const t=$("saveCode"); t.select(); let ok=false; try{ await navigator.clipboard.writeText(t.value); ok=true; }catch(e){ try{ ok=document.execCommand("copy"); }catch(e2){} }
+  $("saveMsg").innerHTML= ok?'<span class="msg-ok">Copied! Paste it somewhere safe.</span>':'<span class="msg-bad">Select the code and press Ctrl+C.</span>'; };
+function openLoad(){ $("loadCode").value=""; $("loadFile").value=""; $("loadMsg").textContent=""; $("loadOv").style.display="flex"; }
+function doLoad(text){ try{ const data=readSave(text); applySave(data); $("loadOv").style.display="none";
+    clearLog(); log(`📂 Progress loaded${data.name?" — welcome back, "+data.name:""}! (${data.levels.filter(x=>x.d).length} levels complete)`,"ok"); }
+  catch(e){ $("loadMsg").innerHTML=`<span class="msg-bad">${e.message}</span>`; } }
+$("loadFile").addEventListener("change",e=>{ const f=e.target.files&&e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>doLoad(String(r.result)); r.readAsText(f); });
+$("loadGo").onclick=()=>{ const t=$("loadCode").value.trim(); if(!t){ $("loadMsg").innerHTML='<span class="msg-bad">Pick a file or paste a save code first.</span>'; return; } doLoad(t); };
+$("saveProgBtn").onclick=openSave; $("loadProgBtn").onclick=openLoad;
+let autoT=null; codeEl.addEventListener("input",()=>{ clearTimeout(autoT); const a=$("autosave"); a.classList.remove("on"); autoT=setTimeout(()=>a.classList.add("on"),500); });
+let tClicks=0, tTimer=null;
+document.querySelector("header h1").addEventListener("click",()=>{ tClicks++; clearTimeout(tTimer); tTimer=setTimeout(()=>tClicks=0,1500);
+  if(tClicks>=5){ tClicks=0; if(sget("mr_teacher")==="1"){ if(confirm("Teacher mode is ON (all levels unlocked). Turn it off?")){ try{localStorage.removeItem("mr_teacher");}catch(e){} fixStartLevel(); buildLevelButtons(); } return; }
+    const code=prompt("Teacher passcode:"); if(code && code.trim().toLowerCase()===TEACHER_CODE){ sset("mr_teacher","1"); buildLevelButtons(); clearLog(); log("👩‍🏫 Teacher mode: every level is unlocked on this computer.","sys"); } } });
 $("startBtn").onclick=()=>{ $("startOv").style.display="flex"; };
 $("progBtn").onclick=showProgress;
 $("frontBtn").onclick=frontView; $("angleBtn").onclick=angleView;
 
-resize(); loadLevel(levelIdx); requestAnimationFrame(frame);
+fixStartLevel(); resize(); loadLevel(levelIdx); requestAnimationFrame(frame);
 if(!sget("mr_seen")) $("startOv").style.display="flex";
 </script>
 </body>
